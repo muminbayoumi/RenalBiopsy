@@ -1,0 +1,139 @@
+---
+title: "Renal Biopsy"
+author: "A.Nour;MMohamed;Ferdinand"
+output:
+  pdf_document:
+    extra_dependencies: ["flafter"]
+    keep_tex: yes
+    md_extensions: +bracketed_spans
+    toc: yes
+  html_notebook:
+    code_folding: hide
+    md_extensions: +bracketed_spans
+    toc: yes
+  html_document:
+    df_print: paged
+    toc: yes
+  word_document:
+    toc: yes
+fig_caption: yes
+tables: yes
+editor_options:
+  chunk_output_type: console
+header-includes:
+- \usepackage{booktabs}
+- \usepackage{longtable}
+- \usepackage{array}
+- \usepackage{multirow}
+- \usepackage{wrapfig}
+- \usepackage{float}
+- \floatplacement{figure}{H}
+- \usepackage{colortbl}
+- \usepackage{pdflscape}
+- \usepackage{tabu}
+- \usepackage{threeparttable}
+- \usepackage{threeparttablex}
+- \usepackage[normalem]{ulem}
+- \usepackage{makecell}
+- \usepackage{xcolor}
+- \usepackage{flafter}
+---
+
+
+## A look into utility of Renal Biopsies and possible Diagnostic Value
+<!-- *** -->
+<!-- The  aim of  this  study is audit the  diagnostic utility of  Renal Biopsies for Renal Masses. We will be looking  in to the  comparitive sensitivty of IR guided  biopsies when compared with final surgical histology. Specifically we want to asses the  diagnostic and value  for Renal Biopsies(RB) in Small Renal Masses(SRM)(<4cm).  -->
+<!-- *** -->
+<!-- \newpage -->
+
+```{r  load-packages, echo=FALSE,include=FALSE }
+library(here)
+library(RColorBrewer)
+library(gridExtra)
+library(ggpubr)
+library(extrafont)
+library(gtsummary)
+library(knitr)
+library(kableExtra)
+library(tableone)
+
+
+
+
+
+loadfonts()
+setwd(here::here())
+source(file="Data.R")
+
+```
+
+### Table 1 - Demographics and Overall Characteristics
+```{r include=T,echo=FALSE,warning=FALSE}
+# t1 <- CreateTableOne(data=full[,-c(1,2,3)],vars = names(full[,-c(1:3,13,24:32)]),strata = "Biopsy_outcome",addOverall = T,) %>% print() %>% kableone() 
+# 
+# RBSummary <-  full %>% subset(Biopsy_outcome!="Missed Target Lesion") %>% 
+#         droplevels() %>% 
+#              tbl_summary(by=Biopsy_outcome,
+#                     label=list(AGE___biopsy~"Age at Biopsy",
+#                                Site__U_M_L_H~"Site in Kidney",
+#                                rT_Stage~"Radiological Tumor Grade")
+#                    
+#                     
+#                                                      ) %>% 
+#    bold_labels() %>% 
+#              add_p() %>% 
+#              add_overall() %>% 
+#         as_flex_table()
+# RBSummary
+tumor_characteristics <- full %>% select(largestmm,Solid_Cystic,Modlaity__CT_USS,Biopsy_outcome,Match,Surgery) %>%
+  filter(Biopsy_outcome!="Missed Target Lesion") %>% 
+  
+  droplevels() %>% 
+  tbl_summary(by=Biopsy_outcome,
+               digits = all_continuous() ~ 3,
+              missing_text = "missing",
+              label = list(largestmm~"Size(Largest Measurement",
+                           Solid_Cystic~"Consistency",
+                           Modlaity__CT_USS~"Imagin Modality"
+                           )
+              
+              ) %>% 
+  modify_spanning_header(c("stat_1","stat_2")~"**Biopsy Outcome**") %>% 
+ 
+  add_overall() %>%
+  add_p() %>% 
+  bold_labels() %>% 
+  bold_p() 
+  
+
+tumor_characteristics$table_header
+tumor_characteristics %>% as_flex_table()
+
+
+```
+# 
+# ###Tabe 2- Binomial Logistic Regression assesing The Biopsy result as a dependent variable
+# ```{r echo=FALSE,include=T,warning=F}
+# full %<>%   subset(Biopsy_outcome!="Missed Target Lesion"&largestmm>-Inf&HSite=="qe") %>% droplevels()
+
+# levels(full$Biopsy_outcome) <- c(0:1)
+# 
+# logit <- glm(Biopsy_outcome~Grade+Endo_vs_Exo+Solid_Cystic+Site__U_M_L_H+Side__L_R+Cores+Passes+Modlaity__CT_USS+largestmm,data=full,family = "binomial")
+# 
+# RBlog <- tbl_regression(logit,exponentiate = T, intercept = T)
+# 
+# 
+# RBlog %>% bold_labels()%>%  as_flex_table()
+```
+
+<!-- ### Graph showing numbers pertaining to radiologically obtained biopsies -->
+<!-- ```{r echo=F,include=T} -->
+<!-- full %>% filter(largestmm<40) %>% ggplot(aes(x=Histology_Simplified,)) +geom_bar()+coord_flip()+facet_wrap(~ManagementSimp)+labs(x="Biopsy Histology",y="Number of patients") -->
+<!-- ``` -->
+
+
+<!-- ### Graph showing numbers pertaining to surgical histology -->
+
+<!-- ```{r echo=F,include=T} -->
+<!-- full %>% ggplot()+geom_bar(aes(x=Surgical_HistologySim),fill='grey15',color='black')+coord_flip() -->
+<!-- ``` -->
